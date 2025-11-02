@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .main {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .ticket-card {
+            background: white;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .status-open { background: #dbeafe; color: #1e40af; }
+        .status-progress { background: #fef3c7; color: #92400e; }
+        .status-resolved { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome, {{ current_user.name }}!</h1>
+        <div class="nav-links">
+            <a href="templates/create-ticket.html" class="btn">Create Ticket</a>
+            <a href="/logout" class="btn">Logout</a>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Tickets</h3>
+                <p>{{ total_tickets }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Open Tickets</h3>
+                <p>{{ open_tickets }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>In Progress</h3>
+                <p>{{ progress_tickets }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Resolved</h3>
+                <p>{{ resolved_tickets }}</p>
+            </div>
+        </div>
+        
+        <h2>Your Tickets</h2>
+        {% if tickets %}
+            {% for ticket in tickets %}
+                <div class="ticket-card">
+                    <h3>{{ ticket.title }}</h3>
+                    <p><strong>Category:</strong> {{ ticket.category }}</p>
+                    <p><strong>Priority:</strong> {{ ticket.priority }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="status-badge status-{{ ticket.status.lower().replace(' ', '') }}">
+                            {{ ticket.status }}
+                        </span>
+                    </p>
+                    <p><strong>Description:</strong> {{ ticket.description }}</p>
+                    <p><strong>Created:</strong> {{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No tickets found. <a href="/create-ticket">Create your first ticket!</a></p>
+        {% endif %}
+    </div>
+</body>
+</html>
+
+
