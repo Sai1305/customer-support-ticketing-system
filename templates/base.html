@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Customer Support{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% block body %}
+{% if current_user.is_authenticated %}
+{# ===== AUTHENTICATED LAYOUT: sidebar + topbar ===== #}
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="fas fa-headset"></i>
+      <span>Support Desk</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Main</div>
+      <a href="{{ url_for('tickets.index') }}"
+         class="sidebar-link {% if request.endpoint == 'tickets.index' %}active{% endif %}">
+        <i class="fas fa-ticket-alt"></i> My Tickets
+      </a>
+      <a href="{{ url_for('tickets.new_ticket') }}"
+         class="sidebar-link {% if request.endpoint == 'tickets.new_ticket' %}active{% endif %}">
+        <i class="fas fa-plus-circle"></i> New Ticket
+      </a>
+
+      {% if current_user.role == 'admin' %}
+      <div class="sidebar-section-label">Administration</div>
+      <a href="{{ url_for('admin.dashboard') }}"
+         class="sidebar-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      {% endif %}
+
+      {% if current_user.role in ('admin', 'agent') %}
+      <div class="sidebar-section-label">Analytics</div>
+      <a href="{{ url_for('reports.overview') }}"
+         class="sidebar-link {% if request.endpoint == 'reports.overview' %}active{% endif %}">
+        <i class="fas fa-chart-pie"></i> Reports
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">
+        {{ (current_user.name or current_user.email)[0]|upper }}
+      </div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ current_user.name or current_user.email }}</div>
+        <div class="sidebar-user-role">{{ current_user.role }}</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+          <div class="topbar-breadcrumb">
+            <a href="{{ url_for('tickets.index') }}">Home</a>
+            {% block breadcrumb %}{% endblock %}
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-container">
+        {% for category, msg in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' or category == 'error' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+          {{ msg }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+{% else %}
+{# ===== GUEST LAYOUT: redirect to login ===== #}
+{% endif %}
+{% endblock %}
+
+</body>
+</html>

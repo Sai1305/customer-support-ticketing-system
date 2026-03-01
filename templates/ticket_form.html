@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}New Ticket — Support Desk{% endblock %}
+{% block page_title %}Create New Ticket{% endblock %}
+{% block breadcrumb %} / <a href="{{ url_for('tickets.index') }}">Tickets</a> / New{% endblock %}
+
+{% block content %}
+<div style="max-width:720px;">
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-plus-circle" style="color:var(--success);margin-right:0.5rem;"></i>New Support Ticket</h3>
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data">
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-heading" style="color:#94a3b8;margin-right:0.25rem;"></i>
+            Title <span class="required">*</span>
+          </label>
+          <input
+            name="title"
+            type="text"
+            class="form-control"
+            placeholder="Brief summary of your issue"
+            required
+          />
+          <div class="form-hint">Give a clear, descriptive title for your issue</div>
+        </div>
+
+        <!-- Category & Priority row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-tag" style="color:#94a3b8;margin-right:0.25rem;"></i>
+              Category
+            </label>
+            <select name="category" class="form-control">
+              <option value="">— Select Category —</option>
+              <option value="login">Login Issue</option>
+              <option value="payment">Payment Problem</option>
+              <option value="technical">Technical Support</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-flag" style="color:#94a3b8;margin-right:0.25rem;"></i>
+              Priority
+            </label>
+            <select name="priority" class="form-control">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-align-left" style="color:#94a3b8;margin-right:0.25rem;"></i>
+            Description
+          </label>
+          <textarea
+            name="description"
+            rows="5"
+            class="form-control"
+            placeholder="Please describe your issue in detail. Include steps to reproduce, expected behaviour, and any error messages."
+          ></textarea>
+        </div>
+
+        <!-- Attachment -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-paperclip" style="color:#94a3b8;margin-right:0.25rem;"></i>
+            Attachment <span style="color:#94a3b8;font-weight:400;">(optional)</span>
+          </label>
+          <input
+            type="file"
+            name="attachment"
+            class="form-file-input"
+          />
+          <div class="form-hint">Accepted formats: PNG, JPG, GIF, PDF, TXT — Max 5 MB</div>
+        </div>
+
+        <!-- Actions -->
+        <hr class="divider">
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+          <a href="{{ url_for('tickets.index') }}" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancel
+          </a>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-paper-plane"></i> Submit Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

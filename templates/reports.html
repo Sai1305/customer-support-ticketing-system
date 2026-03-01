@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Reports — Support Desk{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block breadcrumb %} / <a href="{{ url_for('reports.overview') }}">Reports</a>{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+  <!-- Pie Chart Card -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-chart-pie" style="color:var(--primary);margin-right:0.5rem;"></i>Tickets by Status</h3>
+    </div>
+    <div class="card-body">
+      <div class="chart-container">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bar Chart Card -->
+  <div class="card">
+    <div class="card-header">
+      <h3><i class="fas fa-chart-bar" style="color:var(--secondary);margin-right:0.5rem;"></i>Status Breakdown</h3>
+    </div>
+    <div class="card-body">
+      <div class="chart-container">
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Table -->
+<div class="card" style="margin-top:1.5rem;">
+  <div class="card-header">
+    <h3><i class="fas fa-table" style="color:var(--success);margin-right:0.5rem;"></i>Status Summary</h3>
+  </div>
+  <table class="data-table" id="summaryTable">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Count</th>
+        <th>Percentage</th>
+        <th>Visual</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody">
+      <!-- Populated by JS -->
+    </tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const statusColors = {
+  'Open':        '#3b82f6',
+  'In Progress': '#f59e0b',
+  'Resolved':    '#22c55e',
+  'Closed':      '#94a3b8'
+};
+
+fetch('{{ url_for("reports.data_status") }}')
+  .then(r => r.json())
+  .then(data => {
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+    const total  = values.reduce((a, b) => a + b, 0);
+    const colors = labels.map(l => statusColors[l] || '#6366f1');
+
+    // Pie Chart
+    new Chart(document.getElementById('statusChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
+        },
+        cutout: '60%'
+      }
+    });
+
+    // Bar Chart
+    new Chart(document.getElementById('barChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Tickets',
+          data: values,
+          backgroundColor: colors,
+          borderRadius: 6,
+          barThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+
+    // Summary Table
+    const tbody = document.getElementById('summaryBody');
+    labels.forEach((label, i) => {
+      const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : '0.0';
+      tbody.innerHTML += `
+        <tr>
+          <td><span class="badge badge-${label.toLowerCase().replace(' ', '')}">${label}</span></td>
+          <td><strong>${values[i]}</strong></td>
+          <td>${pct}%</td>
+          <td>
+            <div style="background:#f1f5f9;border-radius:9999px;height:8px;width:100%;max-width:200px;">
+              <div style="background:${colors[i]};border-radius:9999px;height:8px;width:${pct}%;transition:width 0.6s ease;"></div>
+            </div>
+          </td>
+        </tr>`;
+    });
+  });
+</script>
+{% endblock %}

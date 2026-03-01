@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Ticket #{{ ticket.id }} — Support Desk{% endblock %}
+{% block page_title %}Ticket #{{ ticket.id }}{% endblock %}
+{% block breadcrumb %} / <a href="{{ url_for('tickets.index') }}">Tickets</a> / #{{ ticket.id }}{% endblock %}
+
+{% block content %}
+<!-- Ticket Header -->
+<div class="ticket-header">
+  <div>
+    <h2 class="ticket-title">{{ ticket.title }}</h2>
+    <div class="ticket-meta">
+      <span class="badge badge-{{ ticket.status|lower|replace(' ', '') }}">{{ ticket.status }}</span>
+      <span class="badge badge-{{ ticket.priority|lower }}">
+        {% if ticket.priority == 'Urgent' %}<i class="fas fa-fire"></i> {% endif %}{{ ticket.priority }}
+      </span>
+      <span style="color:#94a3b8;font-size:0.8125rem;">
+        <i class="fas fa-clock"></i> Opened {{ ticket.created_at.strftime('%b %d, %Y at %H:%M') }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Info Grid -->
+<div class="ticket-info-grid">
+  <div class="ticket-info-item">
+    <div class="ticket-info-label"><i class="fas fa-tag"></i> Category</div>
+    <div class="ticket-info-value" style="text-transform:capitalize;">{{ ticket.category or 'Not specified' }}</div>
+  </div>
+  <div class="ticket-info-item">
+    <div class="ticket-info-label"><i class="fas fa-flag"></i> Priority</div>
+    <div class="ticket-info-value">{{ ticket.priority }}</div>
+  </div>
+  <div class="ticket-info-item">
+    <div class="ticket-info-label"><i class="fas fa-info-circle"></i> Status</div>
+    <div class="ticket-info-value">{{ ticket.status }}</div>
+  </div>
+  <div class="ticket-info-item">
+    <div class="ticket-info-label"><i class="fas fa-user-tie"></i> Assigned Agent</div>
+    <div class="ticket-info-value">{{ ticket.agent.name or ticket.agent.email if ticket.agent else 'Unassigned' }}</div>
+  </div>
+</div>
+
+<!-- Description Card -->
+<div class="card" style="margin-bottom:1.5rem;">
+  <div class="card-header">
+    <h3><i class="fas fa-align-left" style="color:var(--primary);margin-right:0.5rem;"></i>Description</h3>
+  </div>
+  <div class="card-body">
+    {% if ticket.description %}
+      <p style="line-height:1.7;color:#475569;white-space:pre-wrap;">{{ ticket.description }}</p>
+    {% else %}
+      <p class="text-muted" style="font-style:italic;">No description provided.</p>
+    {% endif %}
+
+    {% if ticket.attachments %}
+    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
+      <span style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">
+        <i class="fas fa-paperclip"></i> Attachment
+      </span>
+      <div style="margin-top:0.375rem;">
+        <a href="{{ url_for('tickets.uploaded_file', filename=ticket.attachments) }}"
+           class="btn btn-secondary btn-sm" target="_blank">
+          <i class="fas fa-download"></i> {{ ticket.attachments }}
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Comments Card -->
+<div class="card">
+  <div class="card-header">
+    <h3><i class="fas fa-comments" style="color:var(--secondary);margin-right:0.5rem;"></i>Comments ({{ ticket.comments|length }})</h3>
+  </div>
+  <div class="card-body">
+    <!-- Add Comment Form -->
+    <form method="post" style="margin-bottom:1.5rem;">
+      <div class="form-group" style="margin-bottom:0.75rem;">
+        <label class="form-label">
+          <i class="fas fa-reply" style="color:#94a3b8;margin-right:0.25rem;"></i>
+          Add a Comment
+        </label>
+        <textarea name="body" class="form-control" rows="3" placeholder="Type your reply here..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">
+        <i class="fas fa-paper-plane"></i> Post Comment
+      </button>
+    </form>
+
+    <hr class="divider">
+
+    <!-- Comments List -->
+    {% if ticket.comments %}
+    <div class="comment-list">
+      {% for c in ticket.comments %}
+      <div class="comment-item">
+        <div class="comment-avatar" style="background:{% if c.author.role == 'admin' %}#a855f7{% elif c.author.role == 'agent' %}#0ea5e9{% else %}#6366f1{% endif %};">
+          {{ (c.author.name or c.author.email)[0]|upper }}
+        </div>
+        <div class="comment-body">
+          <div class="comment-meta">
+            <span class="comment-author">{{ c.author.name or c.author.email }}</span>
+            <span class="badge badge-{{ c.author.role }}">{{ c.author.role }}</span>
+            <span class="comment-time"><i class="fas fa-clock"></i> {{ c.created_at.strftime('%b %d, %Y at %H:%M') }}</span>
+          </div>
+          <div class="comment-text">{{ c.body }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:2rem;">
+      <i class="fas fa-comment-slash"></i>
+      <h4>No Comments Yet</h4>
+      <p>Be the first to add a comment to this ticket.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
